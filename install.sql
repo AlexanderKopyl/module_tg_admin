@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `oc_tg_chats` (
 
 CREATE TABLE IF NOT EXISTS `oc_tg_variables_type`(
     `type_id` int(11) NOT NULL AUTO_INCREMENT,
-    'type_name' varchar(32)	CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `type_name` varchar(32)	CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
     PRIMARY KEY (`type_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
