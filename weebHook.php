@@ -1,10 +1,13 @@
 <?php
 
-$access_token = 'API_token'; //Token
+$access_token = '487901673:AAF1zj9XdPFo8Ra2xm_s8hnU-2hcPv4P8Ko'; //Token
 
 $api = 'https://api.telegram.org/bot' . $access_token; //api bot
 
+$user = 'c0_alex'; //User DB
+$pass = 'Pv7ko@UvHF';//Password DB
 
+$dbh = new PDO('mysql:host=localhost;dbname=b0s', $user, $pass); //Connect to DB
 /**
  * Зададим основные переменные.
  */
@@ -14,8 +17,19 @@ $output = json_decode(file_get_contents('php://input'), TRUE); // Получим
 $chat_id = $output['message']['chat']['id'] ; // Выделим идентификатор чата ( -1001212250728 чат айди ордер лист)
 
 $first_name = $output['message']['chat']['first_name']; // Выделим имя собеседника
+$contact = $output['message']['contact']['phone_number']; // Выделим имя собеседника
 
 $message = $output['message']['text']; // Выделим сообщение собеседника
+
+$name = $output["message"]["from"]["username"]; //Юзернейм пользователя
+$first_name = $output["message"]["from"]["first_name"];
+$last_name = $output["message"]["from"]["last_name"];
+$date = $output["message"]['date'];
+
+//$user_data = array(
+//    'chat' => gettype($output['message']['contact']['phone_number'])
+//);
+//file_put_contents("$name.json", json_encode($user_data));
 
 $callback_query = $output['callback_query'];
 $data = $callback_query['data'];
@@ -24,14 +38,77 @@ $data = $callback_query['data'];
 
 $message_id = ['callback_query']['message']['message_id'];
 
+
+$arrayComands = array(
+    'hello'     => '/hello - С вами поздароваються',
+    'help'      => '/help or help - вывести команды',
+);
+
+$pattern_telephone = "/^\+380\d{3}\d{2}\d{2}\d{2}$/";
+
+$startMonth = date('Y-m-01') . " " . "00:00:00";//Дата начала месяца
+
+$text = "";
+$textHelp = "";
+
+
+$todayTime = date("H:i:s");
+
+
+
+foreach ($arrayComands as $comand => $value){
+    $textHelp .= $value . "\r\n";
+}
+/**
+ * Получим команды от пользователя.
+ * Переведём их для удобства в нижний регистр
+ */
+if(preg_match($pattern_telephone, $contact)){
+    sendMessage($chat_id, 'Cпасибо что поделился');
+    $user_chat = $dbh->prepare("UPDATE `oc_tg_users` SET `telephone`= :telephone WHERE `user_id` = :user_id");
+    $user_chat->execute(array('user_id' => getIdUser($name,$dbh),'telephone' => $contact));
+    exit;
+}
+
 switch(strtolower_ru($message)) {
     case ('/hello'):
     case ('привет'):
-        sendMessage($chat_id, 'Добрый день хозяин, '. $first_name . '! ');
-        sendMessage($chat_id, 'Ваш Айди чата' . $chat_id);
+        sendMessage($chat_id, 'Привет, '. $first_name . '! ');
+        sendMessage($chat_id, 'Ваш айди: ' . $chat_id);
         break;
     case ('/start'):
-        sendMessage($chat_id, "hello i test Bot");
+        sendMessage($chat_id, $textHelp);
+
+
+        if(getIdUser($name,$dbh)){
+            sendMessage($chat_id, "Вы уже подписанны на бота");
+        }else{
+            $user_data = $dbh->prepare("INSERT INTO `oc_tg_users`(`first_name`, `last_name`, `username`,`date_add`) VALUES (:first_name,:last_name,:username,:date_add)");
+            $user_data->execute(array('first_name' => $first_name,'date_add' => date('Y-m-d', $date),'username' => $name,'last_name' => $last_name,));
+
+            $user_chat = $dbh->prepare("INSERT INTO `oc_tg_chats`(`user_id`, `chat_id`) VALUES (:user_id,:chat_id)");
+            $user_chat->execute(array('user_id' => getIdUser($name,$dbh),'chat_id' => $chat_id));
+        }
+
+        break;
+    case ('/help'):
+    case ('help'):
+        sendMessage($chat_id, $textHelp);
+        break;
+    case('/test'):
+        $inline_button1 = array("text"=>"Google url","url"=>"http://google.com");
+        $inline_keyboard = [[$inline_button1]];
+        $keyboard=array("inline_keyboard"=>$inline_keyboard);
+        $replyMarkup = json_encode($keyboard);
+        sendMessageReply_markup($chat_id, "$chat_id", $replyMarkup);
+        break;
+    case('/test1'):
+        $inline_button1 = array("text"=>"Google url","url"=>"http://google.com");
+        $inline_keyboard = [[$inline_button1]];
+        $keyboard=array("inline_keyboard"=>$inline_keyboard);
+        $replyMarkup = json_encode($keyboard);
+        $message = "<a href=\"https://zoocomplex.com.ua/all-absorb-oll-absorb-basic-pelenki-dlya-sobak-56h58sm-100sht\">inline URL</a>";
+        sendMessageWithHtml($chat_id,$message,$replyMarkup,'HTML');
         break;
     default:
         sendMessage($chat_id, 'Гав-гав');
@@ -43,6 +120,20 @@ switch(strtolower_ru($message)) {
  * @param $chat_id
  * @param $message
  */
+function getIdUser($username,$dbh){
+
+    $user_id = 0;
+
+    $user = $dbh->prepare( "SELECT `user_id` FROM `oc_tg_users` WHERE `username` = :username LIMIT 1");
+    $user->execute(array('username' => $username));
+
+    foreach ($user as $row){
+        $user_id = $row['user_id'];
+    }
+
+    return $user_id;
+
+}
 
 function sendMessage($chat_id, $message) {
 
@@ -74,4 +165,23 @@ function strtolower_ru($text) {
 
     return str_replace($alfavitupper,$alfavitlover,strtolower($text));
 
+}
+/**
+ * Функция перевода символов в номера телефона
+ */
+function phn_numb($numb) {
+    if (!is_numeric(substr($numb, 0, 1))  && !is_numeric(substr($numb, 1, 1))) { return $numb; }
+
+    $chars = array(' ', '(', ')', '-', '.');
+    $numb = str_replace($chars, "", $numb);
+
+    if (strlen($numb) > 10) {
+        // a 10 digit number, format as 1-800-555-5555
+        $numb = "+" . substr($numb, 0, 1) . substr($numb, 1, 1) . '(' . substr($numb, 2, 3) . ')' . substr($numb, 4, 3) . "-" . substr($numb, 8, 2). "-". substr($numb, 10, 2) ;
+    }
+    else {
+        $numb = substr($numb, 0, 3) . '-' . substr($numb, 3, 3) . '-' . substr($numb, 5, 4);
+    }
+
+    return $numb;
 }

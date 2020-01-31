@@ -5,8 +5,10 @@
 
             <!-- Кнопки управления -->
             <div class="pull-right">
-                <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+                <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}"
+                        class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i
+                            class="fa fa-reply"></i></a>
             </div>
 
             <!-- Название модуля -->
@@ -23,80 +25,223 @@
     </div>
 
 
-
     <div class="container-fluid">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
             </div>
             <div class="panel-body">
-                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-tg_bot_apikey">{{ entry_tg_bot_apikey }}</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="module_tg_admin_bot_apikey" value="{{ module_tg_admin_bot_apikey }}" placeholder="{{ entry_tg_bot_apikey }}" id="input-tg_bot_apikey" class="form-control" />
-                            {% if  bot.first_name %}
-                                <div class="alert alert-success">
-                                    <i class="fa fa-check-circle"></i>
-                                    {{bot.first_name}}
-                                    @{{ bot.username }}
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module"
+                      class="form-horizontal">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab-general" data-toggle="tab" aria-expanded="true">Общие</a></li>
+                        <li class="">
+                            <a href="#tab-data" data-toggle="tab" aria-expanded="false">Данные</a>
+                        </li>
+                        <li class="">
+                            <a href="#tab-info" data-toggle="tab" aria-expanded="false"><i class="fa fa-info-circle"></i>Инфо</a>
+                        </li>
+                        <li class="">
+                            <a href="#tab-user" data-toggle="tab" aria-expanded="false"><i class="fa fa-user"></i>Подписчики</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab-general">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                       for="input-tg_bot_apikey">{{ entry_tg_bot_apikey }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_tg_admin_bot_apikey"
+                                           value="{{ module_tg_admin_bot_apikey }}"
+                                           placeholder="{{ entry_tg_bot_apikey }}"
+                                           id="input-tg_bot_apikey" class="form-control"/>
+                                    {% if  bot.first_name %}
+                                        <div class="alert alert-success">
+                                            <i class="fa fa-check-circle"></i>
+                                            {{ bot.first_name }}
+                                            @{{ bot.username }}
+                                        </div>
+                                    {% else %}
+                                        <button type="button" class="btn btn-danger">{{ error_bot }}</button>
+                                    {% endif %}
                                 </div>
-                            {% else %}
-                                <button type="button" class="btn btn-danger">{{error_bot}}</button>
-                            {% endif %}
+
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                       for="input-tg_chat_id_admin">{{ entry_tg_chat_id_admin }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_tg_admin_chat_id_admin"
+                                           value="{{ module_tg_admin_chat_id_admin }}"
+                                           placeholder="{{ entry_tg_chat_id_admin }}" id="input-tg_chat_id_admin"
+                                           class="form-control"/>
+                                    <!-- Indicates a successful or positive action -->
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-info-circle"></i>
+                                        Что бы получить свой айди нужно:
+                                        <ul>
+                                            <li>установить weebhook.php в корень сайта и сделать обращение
+                                                https://api.telegram.org/bot{mytoken}/setWebhook?url=https://your.site.com/weebHook.php
+                                            </li>
+                                            <li>
+                                                Что бы веб хук заработал нужно время..и ssl сертефикат на вашем сайте.
+                                            </li>
+                                            <li>
+                                                После того как вебхук подвяжется под вашего бота пропишите в него
+                                                /hello.
+                                                Если все прошло хорошо то бот вам ответит:
+                                                Добрый день хозяин Ваше Имя
+                                                Ваш Айди чата {Ваш айди}
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Настройка: "Статус" -->
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                                <div class="col-sm-10">
+
+                                    <select name="module_tg_admin_status" id="input-status" class="form-control">
+                                        {% if module_tg_admin_status %}
+                                            <option value="1" selected="selected">{{ text_enabled }}</option>
+                                            <option value="0">{{ text_disabled }}</option>
+                                        {% else %}
+                                            <option value="1">{{ text_enabled }}</option>
+                                            <option value="0" selected="selected">{{ text_disabled }}</option>
+                                        {% endif %}
+                                    </select>
+
+                                </div>
+                            </div>
                         </div>
+                        <div class="tab-pane" id="tab-data">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    {% if updates.update_id %}
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Updates ID</h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                {{ updates.update_id }}
+                                            </div>
+                                        </div>
+                                    {% elseif updates.update_error %}
+                                        <div class="panel panel-danger">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Updates Error</h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                {{ updates.update_error }}
+                                            </div>
+                                        </div>
+                                    {% else  %}
+                                        {{ error_bot_updates }}
+                                    {% endif  %}
+                                </div>
+                                <div class="col-xs-6">
+                                    {% if infoweb_url %}
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Weebhook URl</h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                {{ infoweb_url }}
+                                            </div>
+                                        </div>
+                                    {% else  %}
+                                        <div class="panel panel-danger">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Weebhook Error</h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                {{ error_bot_webhookinfo }}
+                                            </div>
+                                        </div>
+                                    {% endif  %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab-user">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Имя</th>
+                                                <th>Фамилия</th>
+                                                <th>UserName</th>
+                                                <th>Дата Добавления</th>
+                                                <th>Telephone</th>
+                                                <th>ID чата</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for user in users %}
+                                                <tr>
+                                                    <th scope="row">{{ user.user_id }}</th>
+                                                    <td>{{ user.first_name }}</td>
+                                                    <td>{{ user.last_name }}</td>
+                                                    <td>{{ user.username }}</td>
+                                                    <td>{{ user.date_add }}</td>
+                                                    <td>{{ user.telephone }}</td>
+                                                    <td>{{ user.chat_id }}</td>
+                                                </tr>
+                                            {% endfor %}
 
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-tg_chat_id_admin">{{ entry_tg_chat_id_admin }}</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="module_tg_admin_chat_id_admin" value="{{ module_tg_admin_chat_id_admin }}" placeholder="{{ entry_tg_chat_id_admin }}" id="input-tg_chat_id_admin" class="form-control" />
-                            <!-- Indicates a successful or positive action -->
-                            <div class="alert alert-success">
-                                <i class="fa fa-info-circle"></i>
-                                Что бы получить свой айди нужно:
-                                <ul>
-                                    <li>установить weebhook.php в корень сайта и сделать обращение
-                                        https://api.telegram.org/bot{mytoken}/setWebhook?url=https://your.site.com/weebHook.php
-                                    </li>
-                                    <li>
-                                        Что бы веб хук заработал нужно время..и ssl сертефикат на вашем сайте.
-                                    </li>
-                                    <li>
-                                        После того как вебхук подвяжется под вашего бота пропишите в него /hello.
-                                        Если все прошло хорошо то бот вам ответит:
-                                        Добрый день хозяин Ваше Имя
-                                        Ваш Айди чата {Ваш айди}
-                                    </li>
-                                </ul>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab-info">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Регистрация</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>Прежде чем начинать разработку, бота необходимо зарегистрировать и получить его уникальный id, являющийся одновременно и токеном. Для этого в Telegram существует специальный бот — @BotFather.</p>
+                                            <p>Пишем ему /start и получаем список всех его команд.</p>
+                                            <p>Первая и главная — /newbot — отправляем ему и бот просит придумать имя нашему новому боту. Единственное ограничение на имя — оно должно оканчиваться на «bot». В случае успеха BotFather возвращает токен бота и ссылку для быстрого добавления бота в контакты, иначе придется поломать голову над именем.</p>
+                                            <p>Для начала работы этого уже достаточно. Особо педантичные могут уже здесь присвоить боту аватар, описание и приветственное сообщение.</p>
+                                            <p>Не забудьте проверить полученный токен с помощью ссылки api.telegram.org/bot{TOKEN}/getMe, говорят, не всегда работает с первого раза.</p>
 
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Настройка: "Статус" -->
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-                        <div class="col-sm-10">
-
-                            <select name="module_tg_admin_status" id="input-status" class="form-control">
-                                {% if module_tg_admin_status %}
-                                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                                    <option value="0">{{ text_disabled }}</option>
-                                {% else %}
-                                    <option value="1">{{ text_enabled }}</option>
-                                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                                {% endif %}
-                            </select>
-
-                        </div>
-                    </div>
-
                 </form>
             </div>
         </div>
     </div>
 </div>
+<style>
+    #tab-data .panel-danger > .panel-heading {
+        color: #e3503e!important;
+        background-color: #f5c1bb!important;
+        border-color: #f3b5ad!important;
+    }
+    #tab-data .panel-primary > .panel-heading {
+        color: #fff!important;
+        background-color: #1e91cf!important;
+        border-color: #1e91cf!important;
+    }
+    #tab-info .panel-primary > .panel-heading {
+        color: #fff!important;
+        background-color: #1e91cf!important;
+        border-color: #1e91cf!important;
+    }
+</style>
 <script>
 
 </script>
