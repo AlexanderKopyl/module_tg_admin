@@ -95,6 +95,9 @@ switch(strtolower_ru($message)) {
     case ('help'):
         sendMessage($chat_id, $textHelp);
         break;
+    case ('не делится телефоном'):
+        sendMessage($chat_id, "Очень жаль.. А мы можем тебе дать за эту скидку");
+        break;
     case('/test'):
         $inline_button1 = array("text"=>"Google url","url"=>"http://google.com");
         $inline_keyboard = [[$inline_button1]];
