@@ -22,6 +22,8 @@
         </div>
     </div>
 
+
+
     <div class="container-fluid">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -29,6 +31,48 @@
             </div>
             <div class="panel-body">
                 <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-tg_bot_apikey">{{ entry_tg_bot_apikey }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="module_tg_admin_bot_apikey" value="{{ module_tg_admin_bot_apikey }}" placeholder="{{ entry_tg_bot_apikey }}" id="input-tg_bot_apikey" class="form-control" />
+                            {% if  bot.first_name %}
+                                <div class="alert alert-success">
+                                    <i class="fa fa-check-circle"></i>
+                                    {{bot.first_name}}
+                                    @{{ bot.username }}
+                                </div>
+                            {% else %}
+                                <button type="button" class="btn btn-danger">{{error_bot}}</button>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-tg_chat_id_admin">{{ entry_tg_chat_id_admin }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="module_tg_admin_chat_id_admin" value="{{ module_tg_admin_chat_id_admin }}" placeholder="{{ entry_tg_chat_id_admin }}" id="input-tg_chat_id_admin" class="form-control" />
+                            <!-- Indicates a successful or positive action -->
+                            <div class="alert alert-success">
+                                <i class="fa fa-info-circle"></i>
+                                Что бы получить свой айди нужно:
+                                <ul>
+                                    <li>установить weebhook.php в корень сайта и сделать обращение
+                                        https://api.telegram.org/bot{mytoken}/setWebhook?url=https://your.site.com/weebHook.php
+                                    </li>
+                                    <li>
+                                        Что бы веб хук заработал нужно время..и ssl сертефикат на вашем сайте.
+                                    </li>
+                                    <li>
+                                        После того как вебхук подвяжется под вашего бота пропишите в него /hello.
+                                        Если все прошло хорошо то бот вам ответит:
+                                        Добрый день хозяин Ваше Имя
+                                        Ваш Айди чата {Ваш айди}
+                                    </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Настройка: "Статус" -->
                     <div class="form-group">
@@ -53,4 +97,7 @@
         </div>
     </div>
 </div>
+<script>
+
+</script>
 {{ footer }}
