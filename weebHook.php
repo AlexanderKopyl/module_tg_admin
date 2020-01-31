@@ -1,20 +1,20 @@
 <?php
 
-$access_token = '487901673:AAF1zj9XdPFo8Ra2xm_s8hnU-2hcPv4P8Ko'; //Token
+$access_token = 'BOT_TOKEN'; //Token
 
 $api = 'https://api.telegram.org/bot' . $access_token; //api bot
 
-$user = 'c0_alex'; //User DB
-$pass = 'Pv7ko@UvHF';//Password DB
+$user = 'BD_LOGIN'; //User DB
+$pass = 'BD_PASSWORD';//Password DB
 
-$dbh = new PDO('mysql:host=localhost;dbname=b0s', $user, $pass); //Connect to DB
+$dbh = new PDO('mysql:host=localhost;dbname={BD_NAME}', $user, $pass); //Connect to DB
 /**
  * Зададим основные переменные.
  */
 
 $output = json_decode(file_get_contents('php://input'), TRUE); // Получим то, что передано скрипту ботом в POST-сообщении и распарсим
 
-$chat_id = $output['message']['chat']['id'] ; // Выделим идентификатор чата ( -1001212250728 чат айди ордер лист)
+$chat_id = $output['message']['chat']['id'] ;
 
 $first_name = $output['message']['chat']['first_name']; // Выделим имя собеседника
 $contact = $output['message']['contact']['phone_number']; // Выделим имя собеседника
@@ -46,8 +46,6 @@ $arrayComands = array(
 
 $pattern_telephone = "/^\+380\d{3}\d{2}\d{2}\d{2}$/";
 
-$startMonth = date('Y-m-01') . " " . "00:00:00";//Дата начала месяца
-
 $text = "";
 $textHelp = "";
 
@@ -59,16 +57,17 @@ $todayTime = date("H:i:s");
 foreach ($arrayComands as $comand => $value){
     $textHelp .= $value . "\r\n";
 }
-/**
- * Получим команды от пользователя.
- * Переведём их для удобства в нижний регистр
- */
 if(preg_match($pattern_telephone, $contact)){
     sendMessage($chat_id, 'Cпасибо что поделился');
     $user_chat = $dbh->prepare("UPDATE `oc_tg_users` SET `telephone`= :telephone WHERE `user_id` = :user_id");
     $user_chat->execute(array('user_id' => getIdUser($name,$dbh),'telephone' => $contact));
     exit;
 }
+
+/**
+ * Получим команды от пользователя.
+ * Переведём их для удобства в нижний регистр
+ */
 
 switch(strtolower_ru($message)) {
     case ('/hello'):
