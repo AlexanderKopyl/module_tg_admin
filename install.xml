@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Log 404 errors</name>
+    <code>error_log</code>
+    <version>1.0</version>
+    <author>Копыл Александр</author>
+    <link>zoocomplex.com.ua</link>
+    <file path="catalog/controller/error/not_found.php">
+        <operation>
+            <search position="before"><![CDATA[$this->load->language('error/not_found');]]></search>
+            <add position="before"><![CDATA[
+if (isset($_SERVER['REMOTE_ADDR'])) {
+$ip = $_SERVER['REMOTE_ADDR'];
+} else {
+$ip = "-";
+}
+if (isset($_SERVER['HTTP_REFERER'])) {
+$referer = $_SERVER['HTTP_REFERER'];
+} else {
+$referer = "not detected";
+}
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+$browser = $_SERVER['HTTP_USER_AGENT'];
+} else {
+$browser = "-";
+}
+if (isset($_SERVER['REQUEST_URI'])) {
+$request_uri = $_SERVER['REQUEST_URI'];
+} else {
+$request_uri = "not detected";
+}
+$datetime = date("Y-m-d G:i:s");
+
+$log_line = $datetime . ": " . $ip . ": " . $browser . ": " . $referer . ": " . $request_uri . "\r\n";
+$logfile = fopen(DIR_LOGS . "404_log.log", 'a+');
+fwrite($logfile, $log_line);
+fclose($logfile);
+]]></add>
+        </operation>
+    </file>
+</modification>
