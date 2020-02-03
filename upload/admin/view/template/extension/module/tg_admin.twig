@@ -174,16 +174,17 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Имя</th>
-                                                <th>Фамилия</th>
+                                                <th>Фамелия</th>
                                                 <th>UserName</th>
                                                 <th>Дата Добавления</th>
                                                 <th>Telephone</th>
                                                 <th>ID чата</th>
+                                                <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for user in users %}
-                                                <tr>
+                                                <tr data-key="{{ user.user_id }}">
                                                     <th scope="row">{{ user.user_id }}</th>
                                                     <td>{{ user.first_name }}</td>
                                                     <td>{{ user.last_name }}</td>
@@ -191,6 +192,19 @@
                                                     <td>{{ user.date_add }}</td>
                                                     <td>{{ user.telephone }}</td>
                                                     <td>{{ user.chat_id }}</td>
+                                                    {% if not user.telephone %}
+                                                        <td>
+                                                            <button type="button" class="btn btn-primary send_request_{{ user.user_id }}" data-toggle="tooltip" data-original-title="Отправить запрос" data-chat_id="{{ user.chat_id }}" onclick="send_request({{ user.chat_id }},'send_request_{{ user.user_id }}')">
+                                                                <i class="fa fa-volume-control-phone" aria-hidden="true"></i>
+                                                            </button>
+                                                        </td>
+                                                    {% else %}
+                                                        <td>
+                                                            <button type="button" disabled class="btn btn-success" data-toggle="tooltip" data-original-title="Запрос получен" >
+                                                                <i class="fa fa-lock" aria-hidden="true"></i>
+                                                            </button>
+                                                        </td>
+                                                    {% endif %}
                                                 </tr>
                                             {% endfor %}
 
@@ -225,24 +239,28 @@
         </div>
     </div>
 </div>
-<style>
-    #tab-data .panel-danger > .panel-heading {
-        color: #e3503e!important;
-        background-color: #f5c1bb!important;
-        border-color: #f3b5ad!important;
-    }
-    #tab-data .panel-primary > .panel-heading {
-        color: #fff!important;
-        background-color: #1e91cf!important;
-        border-color: #1e91cf!important;
-    }
-    #tab-info .panel-primary > .panel-heading {
-        color: #fff!important;
-        background-color: #1e91cf!important;
-        border-color: #1e91cf!important;
-    }
-</style>
 <script>
-
+    function send_request(chat_id,user_class){
+        $.ajax({
+            url: "index.php?route=extension/module/tg_admin/sendKeyboardForTelephone&chat_id=" +chat_id + "&user_token={{ user_token }}",
+            type: 'post',
+            data: {'chat_id' : chat_id},
+            beforeSend: function() {
+                $('.'+user_class).button('loading');
+            },
+            complete: function() {
+                $('.'+ user_class).button('reset');
+            },
+            success: function(json) {
+                console.log(json);
+                if (json['error']) {
+                    $('#content').parent().before('<div class="alert alert-danger error_tg_admin"><i class="fa fa-exclamation-circle"></i>'+json['error']+'<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                }
+            },
+            error: function (e) {
+                console.log(e)
+            }
+        });
+    }
 </script>
 {{ footer }}

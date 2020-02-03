@@ -38,11 +38,11 @@ class ControllerExtensionModuleTgAdmin extends Controller
             $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
         }
 
-        $this->document->addStyle('admin/stylesheet/tg_admin/style.css?v=3');
+        $this->document->addStyle('view/stylesheet/tg_admin/style.css?v=2');
         // Кнопки действий
         $data['action'] = $this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
-
+        $data['user_token'] = $this->session->data['user_token'];
 
         $data['breadcrumbs'] = array();
 
@@ -193,43 +193,67 @@ class ControllerExtensionModuleTgAdmin extends Controller
         $loop->run();
     }
 
-    public function sendKeyboardForTelephone($chatId)
+    public function sendKeyboardForTelephone()
     {
-        $loop = Factory::create();
-        $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
+        $this->load->language('extension/module/tg_admin');
 
-        $sendMessage = new SendMessage();
-        $sendMessage->chat_id = $chatId;
-        $sendMessage->text = 'Хотите поделится номер телефона .. Для больших скидок';
-        $sendMessage->reply_markup = new ReplyKeyboardMarkup();
-        $sendMessage->reply_markup->one_time_keyboard = true;
+        $json = array();
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+
+            if ((utf8_strlen($this->request->post['chat_id']) < 9) || (utf8_strlen($this->request->post['chat_id']) > 10)) {
+                $json['error'] = $this->language->get('error_chat_id');
+            }
+
+//            $json['error_length'] = utf8_strlen($this->request->post['chat_id']);
+
+            if(!$json){
+                $loop = Factory::create();
+                $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
+
+                $sendMessage = new SendMessage();
+                $sendMessage->chat_id = $this->request->get['chat_id'];
+                $sendMessage->text = 'Хотите поделится номером телефона .. Для больших скидок';
+                $sendMessage->reply_markup = new ReplyKeyboardMarkup();
+                $sendMessage->reply_markup->one_time_keyboard = true;
 
 // Create the first button
-        $keyboardButton = new KeyboardButton();
-        $keyboardButton->text = 'Да поделится';
-        $keyboardButton->request_contact = true;
-        $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
+                $keyboardButton = new KeyboardButton();
+                $keyboardButton->text = 'Да поделится';
+                $keyboardButton->request_contact = true;
+                $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
 
-        // Create the second button
-        $keyboardButton = new KeyboardButton();
-        $keyboardButton->text = 'Не делится телефоном';
-        $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
+                // Create the second button
+                $keyboardButton = new KeyboardButton();
+                $keyboardButton->text = 'Не делится телефоном';
+                $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
 
-        $promise = $tgLog->performApiRequest($sendMessage);
+                $promise = $tgLog->performApiRequest($sendMessage);
 
-        $promise->then(
-            function ($response) {
+                $promise->then(
+                    function ($response) {
 //                echo '<pre>';
 //                var_dump($response);
 //                echo '</pre>';
-            },
-            function (\Exception $exception) {
-                // Onoes, an exception occurred...
-                echo 'Exception ' . get_class($exception) . ' caught, message: ' . $exception->getMessage();
-            }
-        );
+                    },
+                    function (\Exception $exception) {
+                        // Onoes, an exception occurred...
+                        echo 'Exception ' . get_class($exception) . ' caught, message: ' . $exception->getMessage();
+                    }
+                );
 
-        $loop->run();
+                $loop->run();
+            }
+
+            if (!isset($json['error'])) {
+                $json['success'] = $this->language->get('text_telephone_success');
+            }
+
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+
     }
 
     protected function validate()

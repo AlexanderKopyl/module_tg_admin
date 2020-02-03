@@ -14,7 +14,9 @@ $_['text_enabled']              = 'Включено';
 $_['text_disabled']             = 'Выключено';
 $_['entry_tg_bot_apikey']       = 'Введите Api-Key Bot';
 $_['entry_tg_chat_id_admin']    = 'Введите Chat-Id Admin';
-$_['button_apply']              = "Применить";
+$_['text_telephone_success']    = 'Запрос на телефон отправлен';
+
 
 //Error
-$_['error_permission'] = 'У вас недостаточно прав для внесения изменений!';
+$_['error_permission']      = 'У вас недостаточно прав для внесения изменений!';
+$_['error_chat_id']         = 'Ошибка чат айди не коректен';
