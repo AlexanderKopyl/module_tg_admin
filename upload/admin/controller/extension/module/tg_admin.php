@@ -19,6 +19,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
     private $error = array();
     private $webHook = array();
     private $updates = array();
+    private $error_logfile = '404_log.log';
 
     public function index()
     {
@@ -39,6 +40,14 @@ class ControllerExtensionModuleTgAdmin extends Controller
         }
 
         $this->document->addStyle('view/stylesheet/tg_admin/style.css?v=2');
+
+        if (isset($this->session->data['success'])) {
+            $data['success'] = $this->session->data['success'];
+            unset($this->session->data['success']);
+        } else {
+            $data['success'] = '';
+        }
+
         // Кнопки действий
         $data['action'] = $this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
@@ -254,6 +263,20 @@ class ControllerExtensionModuleTgAdmin extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
 
+    }
+
+    public function clearError() {
+        $this->load->language('extension/module/tg_admin');
+
+        $file = DIR_LOGS . $this->error_logfile;
+
+        $handle = fopen($file, 'w+');
+
+        fclose($handle);
+
+        $this->session->data['success'] = $this->language->get('text_success');
+
+        $this->response->redirect($this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true));
     }
 
     protected function validate()
