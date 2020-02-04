@@ -93,15 +93,16 @@ class ControllerExtensionModuleTgAdmin extends Controller
         } else {
             $data['module_tg_admin_chat_id_admin'] = $this->config->get('module_tg_admin_chat_id_admin');
         }
+        $bot_api = $this->config->get('module_tg_admin_bot_apikey') ?: '74409123123:adadasdasdasdasd';
 
         try {
-            $data['bot'] = $this->getMe();
+            $data['bot'] = $this->getMe($bot_api);
         } catch (Exception $e) {
             $data['error_bot'] = 'Ошибка: ' . $e->getMessage();
         }
 
         try {
-            $this->getUpdates();
+            $this->getUpdates($bot_api);
             $data['updates'] = $this->updates;
         } catch (Exception $e) {
             $data['error_bot_updates'] = 'Ошибка: ' . $e->getMessage();
@@ -109,7 +110,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
 //        var_dump($data['updates']);
 
         try {
-            $this->getWebhookinfo();
+            $this->getWebhookinfo($bot_api);
             $data['infoweb_url'] = $this->webHook['info']->url;
         } catch (Exception $e) {
             $data['error_bot_webhookinfo'] = 'Ошибка: ' . $e->getMessage();
@@ -123,6 +124,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
 //        $this->sendKeyboardForTelephone($this->config->get('module_tg_admin_chat_id_admin'));
 
         $data['users'] = $this->model_extension_module_tg_admin->getUsers();
+
         // Загрузка шаблонов для шапки, колонки слева и футера
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -148,10 +150,10 @@ class ControllerExtensionModuleTgAdmin extends Controller
     }
 
     //    Get information about Bot
-    protected function getMe()
+    protected function getMe($api)
     {
         $loop = Factory::create();
-        $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
+        $tgLog = new TgLog($api, new HttpClientRequestHandler($loop));
 
         $response = Clue\React\Block\await($tgLog->performApiRequest(new GetMe()), $loop);
 
@@ -163,10 +165,10 @@ class ControllerExtensionModuleTgAdmin extends Controller
         return $data;
     }
 
-    protected function getUpdates()
+    protected function getUpdates($api)
     {
         $loop = Factory::create();
-        $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
+        $tgLog = new TgLog($api, new HttpClientRequestHandler($loop));
 
         $getUpdates = new GetUpdates();
 
@@ -189,10 +191,10 @@ class ControllerExtensionModuleTgAdmin extends Controller
         $loop->run();
     }
 
-    protected function getWebhookinfo()
+    protected function getWebhookinfo($api)
     {
         $loop = Factory::create();
-        $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
+        $tgLog = new TgLog($api, new HttpClientRequestHandler($loop));
 
         $webHookInfo = new GetWebhookInfo();
 
@@ -238,11 +240,6 @@ class ControllerExtensionModuleTgAdmin extends Controller
                 $keyboardButton = new KeyboardButton();
                 $keyboardButton->text = 'Да поделится';
                 $keyboardButton->request_contact = true;
-                $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
-
-                // Create the second button
-                $keyboardButton = new KeyboardButton();
-                $keyboardButton->text = 'Не делится телефоном';
                 $sendMessage->reply_markup->keyboard[0][] = $keyboardButton;
 
                 $promise = $tgLog->performApiRequest($sendMessage);

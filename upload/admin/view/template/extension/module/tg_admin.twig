@@ -183,7 +183,7 @@
                             <div class="row">
                                 <div class="col-xs-12">
                                     <div class="table-responsive">
-                                        <table class="table table-bordered">
+                                        <table class="table table-bordered" id="users">
                                             <thead>
                                             <tr>
                                                 <th>#</th>
@@ -197,38 +197,44 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for user in users %}
-                                                <tr data-key="{{ user.user_id }}">
-                                                    <th scope="row">{{ user.user_id }}</th>
-                                                    <td>{{ user.first_name }}</td>
-                                                    <td>{{ user.last_name }}</td>
-                                                    <td>{{ user.username }}</td>
-                                                    <td>{{ user.date_add }}</td>
-                                                    <td>{{ user.telephone }}</td>
-                                                    <td>{{ user.chat_id }}</td>
-                                                    {% if not user.telephone %}
-                                                        <td>
-                                                            <button type="button"
-                                                                    class="btn btn-primary send_request_{{ user.user_id }}"
-                                                                    data-toggle="tooltip"
-                                                                    data-original-title="Отправить запрос"
-                                                                    data-chat_id="{{ user.chat_id }}"
-                                                                    onclick="send_request({{ user.chat_id }},'send_request_{{ user.user_id }}')">
-                                                                <i class="fa fa-volume-control-phone"
-                                                                   aria-hidden="true"></i>
-                                                            </button>
-                                                        </td>
-                                                    {% else %}
-                                                        <td>
-                                                            <button type="button" disabled class="btn btn-success"
-                                                                    data-toggle="tooltip"
-                                                                    data-original-title="Запрос получен">
-                                                                <i class="fa fa-lock" aria-hidden="true"></i>
-                                                            </button>
-                                                        </td>
-                                                    {% endif %}
+                                            {% if users %}
+                                                {% for user in users %}
+                                                    <tr data-key="{{ user.user_id }}">
+                                                        <th scope="row">{{ user.user_id }}</th>
+                                                        <td>{{ user.first_name }}</td>
+                                                        <td>{{ user.last_name }}</td>
+                                                        <td>{{ user.username }}</td>
+                                                        <td>{{ user.date_add }}</td>
+                                                        <td>{{ user.telephone }}</td>
+                                                        <td>{{ user.chat_id }}</td>
+                                                        {% if not user.telephone %}
+                                                            <td>
+                                                                <button type="button"
+                                                                        class="btn btn-primary send_request_{{ user.user_id }}"
+                                                                        data-toggle="tooltip"
+                                                                        data-original-title="Отправить запрос"
+                                                                        data-chat_id="{{ user.chat_id }}"
+                                                                        onclick="send_request({{ user.chat_id }},'send_request_{{ user.user_id }}')">
+                                                                    <i class="fa fa-volume-control-phone"
+                                                                       aria-hidden="true"></i>
+                                                                </button>
+                                                            </td>
+                                                        {% else %}
+                                                            <td>
+                                                                <button type="button" disabled class="btn btn-success"
+                                                                        data-toggle="tooltip"
+                                                                        data-original-title="Запрос получен">
+                                                                    <i class="fa fa-lock" aria-hidden="true"></i>
+                                                                </button>
+                                                            </td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td class="text-center" colspan="7">{{ text_no_results }}</td>
                                                 </tr>
-                                            {% endfor %}
+                                            {% endif %}
 
                                             </tbody>
                                         </table>
@@ -448,6 +454,11 @@
     {% if errors_admin %}
     $(document).ready( function () {
         $('#error_admin_table').DataTable();
+    } );
+    {% endif %}
+    {% if users %}
+    $(document).ready( function () {
+        $('#users').DataTable();
     } );
     {% endif %}
 </script>
