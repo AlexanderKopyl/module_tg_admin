@@ -20,6 +20,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
     private $webHook = array();
     private $updates = array();
     private $error_logfile = '404_log.log';
+    private $error_logfile_admin = '404_admin_login.log';
 
     public function index()
     {
@@ -105,6 +106,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
         } catch (Exception $e) {
             $data['error_bot_updates'] = 'Ошибка: ' . $e->getMessage();
         }
+//        var_dump($data['updates']);
 
         try {
             $this->getWebhookinfo();
@@ -113,9 +115,12 @@ class ControllerExtensionModuleTgAdmin extends Controller
             $data['error_bot_webhookinfo'] = 'Ошибка: ' . $e->getMessage();
         }
 
-        $file = DIR_LOGS . $this->error_logfile;
+        $file       = DIR_LOGS . $this->error_logfile;
+        $file_admin = DIR_LOGS . $this->error_logfile_admin;
 
         $data['errors'] = $this->ErrorTxtToArray($file);
+        $data['errors_admin'] = $this->ErrorAdminTxtToArray($file_admin);
+//        $this->sendKeyboardForTelephone($this->config->get('module_tg_admin_chat_id_admin'));
 
         $data['users'] = $this->model_extension_module_tg_admin->getUsers();
         // Загрузка шаблонов для шапки, колонки слева и футера
@@ -282,8 +287,41 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
         $this->response->redirect($this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true));
     }
+    public function clearErrorAdmin()
+    {
+        $this->load->language('extension/module/tg_admin');
+
+        $file = DIR_LOGS . $this->error_logfile_admin;
+
+        $handle = fopen($file, 'w+');
+
+        fclose($handle);
+
+        $this->session->data['success'] = $this->language->get('text_success');
+
+        $this->response->redirect($this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true));
+    }
 
     protected function ErrorTxtToArray($file)
+    {
+
+        $file_handle = fopen($file, "r");
+
+        $rows_array = array();
+
+        while (!feof($file_handle)) {
+            $line = fgets($file_handle);
+            if ($line) {
+                $rows_array[] = explode(":::", preg_split('/[\n\r]+/', $line, 1)[0]);
+            }
+
+        }
+        fclose($file_handle);
+
+        return $rows_array;
+
+    }
+    protected function ErrorAdminTxtToArray($file)
     {
 
         $file_handle = fopen($file, "r");

@@ -38,4 +38,26 @@ fclose($logfile);
 ]]></add>
         </operation>
     </file>
+    <file path="admin/controller/common/login.php">
+        <operation>
+            <search><![CDATA[$this->load->language('common/login');]]></search>
+            <add position="after"><![CDATA[
+            $pass = null;
+            if (!isset($_GET[PASS_KEY]) || $_GET[PASS_KEY] != PASS)
+            {
+                $this->response->redirect('https://'.$_SERVER['HTTP_HOST']."/");
+            }
+            else
+            {
+                $pass = '&'.PASS_KEY.'='.PASS;
+            }
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[$data['action'] = $this->url->link('common/login', '', true);]]></search>
+            <add position="replace"><![CDATA[
+            $data['action'] = $this->url->link('common/login', '', true).$pass;
+            ]]></add>
+        </operation>
+    </file>
 </modification>
