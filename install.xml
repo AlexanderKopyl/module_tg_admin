@@ -31,7 +31,7 @@ $request_uri = "not detected";
 }
 $datetime = date("Y-m-d G:i:s");
 
-$log_line = $datetime . ": " . $ip . ": " . $browser . ": " . $referer . ": " . $request_uri . "\r\n";
+$log_line = $datetime . ":::" . $ip . ":::" . $browser . ":::" . $referer . ":::" . $request_uri . "\r\n";
 $logfile = fopen(DIR_LOGS . "404_log.log", 'a+');
 fwrite($logfile, $log_line);
 fclose($logfile);
