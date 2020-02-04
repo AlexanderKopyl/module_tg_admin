@@ -1,0 +1,20 @@
+#tab-data .panel-danger > .panel-heading {
+    color: #e3503e !important;
+    background-color: #f5c1bb !important;
+    border-color: #f3b5ad !important;
+}
+
+#tab-data .panel-primary > .panel-heading {
+    color: #fff !important;
+    background-color: #1e91cf !important;
+    border-color: #1e91cf !important;
+}
+
+#tab-info .panel-primary > .panel-heading {
+    color: #fff !important;
+    background-color: #1e91cf !important;
+    border-color: #1e91cf !important;
+}
+ul#tg_admin_nav i {
+    margin-right: 5px;
+}

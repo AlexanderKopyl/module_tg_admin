@@ -38,16 +38,21 @@
             <div class="panel-body">
                 <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module"
                       class="form-horizontal">
-                    <ul class="nav nav-tabs">
+                    <ul class="nav nav-tabs" id="tg_admin_nav">
                         <li class="active"><a href="#tab-general" data-toggle="tab" aria-expanded="true">Общие</a></li>
                         <li class="">
                             <a href="#tab-data" data-toggle="tab" aria-expanded="false">Данные</a>
                         </li>
                         <li class="">
-                            <a href="#tab-info" data-toggle="tab" aria-expanded="false"><i class="fa fa-info-circle"></i>Инфо</a>
+                            <a href="#tab-info" data-toggle="tab" aria-expanded="false"><i
+                                        class="fa fa-info-circle"></i>Инфо</a>
                         </li>
                         <li class="">
                             <a href="#tab-user" data-toggle="tab" aria-expanded="false"><i class="fa fa-user"></i>Подписчики</a>
+                        </li>
+                        <li class="">
+                            <a href="#tab-error" data-toggle="tab" aria-expanded="false"><i
+                                        class="fa fa-exclamation-triangle"></i>Ошибки</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -143,9 +148,9 @@
                                                 {{ updates.update_error }}
                                             </div>
                                         </div>
-                                    {% else  %}
+                                    {% else %}
                                         {{ error_bot_updates }}
-                                    {% endif  %}
+                                    {% endif %}
                                 </div>
                                 <div class="col-xs-6">
                                     {% if infoweb_url %}
@@ -157,7 +162,7 @@
                                                 {{ infoweb_url }}
                                             </div>
                                         </div>
-                                    {% else  %}
+                                    {% else %}
                                         <div class="panel panel-danger">
                                             <div class="panel-heading">
                                                 <h3 class="panel-title">Weebhook Error</h3>
@@ -166,7 +171,7 @@
                                                 {{ error_bot_webhookinfo }}
                                             </div>
                                         </div>
-                                    {% endif  %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -199,13 +204,21 @@
                                                     <td>{{ user.chat_id }}</td>
                                                     {% if not user.telephone %}
                                                         <td>
-                                                            <button type="button" class="btn btn-primary send_request_{{ user.user_id }}" data-toggle="tooltip" data-original-title="Отправить запрос" data-chat_id="{{ user.chat_id }}" onclick="send_request({{ user.chat_id }},'send_request_{{ user.user_id }}')">
-                                                                <i class="fa fa-volume-control-phone" aria-hidden="true"></i>
+                                                            <button type="button"
+                                                                    class="btn btn-primary send_request_{{ user.user_id }}"
+                                                                    data-toggle="tooltip"
+                                                                    data-original-title="Отправить запрос"
+                                                                    data-chat_id="{{ user.chat_id }}"
+                                                                    onclick="send_request({{ user.chat_id }},'send_request_{{ user.user_id }}')">
+                                                                <i class="fa fa-volume-control-phone"
+                                                                   aria-hidden="true"></i>
                                                             </button>
                                                         </td>
                                                     {% else %}
                                                         <td>
-                                                            <button type="button" disabled class="btn btn-success" data-toggle="tooltip" data-original-title="Запрос получен" >
+                                                            <button type="button" disabled class="btn btn-success"
+                                                                    data-toggle="tooltip"
+                                                                    data-original-title="Запрос получен">
                                                                 <i class="fa fa-lock" aria-hidden="true"></i>
                                                             </button>
                                                         </td>
@@ -219,6 +232,64 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="tab-pane" id="tab-error">
+
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="table-responsive">
+
+                                        <table class="table table-bordered" id="error_table">
+                                            <thead>
+                                            <tr>
+                                                <th>dateTime</th>
+                                                <th>ip</th>
+                                                <th>browser</th>
+                                                <th>referer</th>
+                                                <th>request_uri</th>
+                                                <th>Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% if errors %}
+                                                {% for error in errors %}
+                                                    <tr>
+                                                        <th scope="row">{{ error[0] }}</th>
+                                                        <td>{{ error[1] }}</td>
+                                                        <td>{{ error[2] }}</td>
+                                                        <td>{{ error[3] }}</td>
+                                                        <td>{{ error[4] }}</td>
+                                                        {% if error[1] %}
+                                                            <td>
+                                                                <button type="button"
+                                                                        class="btn btn-primary"
+                                                                        data-toggle="tooltip"
+                                                                        data-original-title="Отправить запрос"
+                                                                        data-ip="{{ error[1] }}"
+                                                                        onclick="send_ban('{{ error[1] }}')">
+                                                                    <i class="fa fa-ban" aria-hidden="true"></i>
+                                                                </button>
+                                                            </td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                                                </tr>
+                                            {% endif %}
+
+                                            </tbody>
+                                        </table>
+                                        <div class="text-right">
+                                            <a href="index.php?route=extension/module/tg_admin/clearError&user_token={{ user_token }}" class="btn btn-danger send_clear" onclick="clearErrorFile()">
+                                                <i class="fa fa-eraser"></i>
+                                                Очистить
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="tab-pane" id="tab-info">
                             <div class="row">
                                 <div class="col-xs-12">
@@ -227,11 +298,20 @@
                                             <h3 class="panel-title">Регистрация</h3>
                                         </div>
                                         <div class="panel-body">
-                                            <p>Прежде чем начинать разработку, бота необходимо зарегистрировать и получить его уникальный id, являющийся одновременно и токеном. Для этого в Telegram существует специальный бот — @BotFather.</p>
+                                            <p>Прежде чем начинать разработку, бота необходимо зарегистрировать и
+                                                получить его уникальный id, являющийся одновременно и токеном. Для этого
+                                                в Telegram существует специальный бот — @BotFather.</p>
                                             <p>Пишем ему /start и получаем список всех его команд.</p>
-                                            <p>Первая и главная — /newbot — отправляем ему и бот просит придумать имя нашему новому боту. Единственное ограничение на имя — оно должно оканчиваться на «bot». В случае успеха BotFather возвращает токен бота и ссылку для быстрого добавления бота в контакты, иначе придется поломать голову над именем.</p>
-                                            <p>Для начала работы этого уже достаточно. Особо педантичные могут уже здесь присвоить боту аватар, описание и приветственное сообщение.</p>
-                                            <p>Не забудьте проверить полученный токен с помощью ссылки api.telegram.org/bot{TOKEN}/getMe, говорят, не всегда работает с первого раза.</p>
+                                            <p>Первая и главная — /newbot — отправляем ему и бот просит придумать имя
+                                                нашему новому боту. Единственное ограничение на имя — оно должно
+                                                оканчиваться на «bot». В случае успеха BotFather возвращает токен бота и
+                                                ссылку для быстрого добавления бота в контакты, иначе придется поломать
+                                                голову над именем.</p>
+                                            <p>Для начала работы этого уже достаточно. Особо педантичные могут уже здесь
+                                                присвоить боту аватар, описание и приветственное сообщение.</p>
+                                            <p>Не забудьте проверить полученный токен с помощью ссылки
+                                                api.telegram.org/bot{TOKEN}/getMe, говорят, не всегда работает с первого
+                                                раза.</p>
 
                                         </div>
                                     </div>
@@ -244,22 +324,23 @@
         </div>
     </div>
 </div>
+
 <script>
-    function send_request(chat_id,user_class){
+    function send_request(chat_id, user_class) {
         $.ajax({
-            url: "index.php?route=extension/module/tg_admin/sendKeyboardForTelephone&chat_id=" +chat_id + "&user_token={{ user_token }}",
+            url: "index.php?route=extension/module/tg_admin/sendKeyboardForTelephone&chat_id=" + chat_id + "&user_token={{ user_token }}",
             type: 'post',
-            data: {'chat_id' : chat_id},
-            beforeSend: function() {
-                $('.'+user_class).button('loading');
+            data: {'chat_id': chat_id},
+            beforeSend: function () {
+                $('.' + user_class).button('loading');
             },
-            complete: function() {
-                $('.'+ user_class).button('reset');
+            complete: function () {
+                $('.' + user_class).button('reset');
             },
-            success: function(json) {
+            success: function (json) {
                 console.log(json);
                 if (json['error']) {
-                    $('#content').parent().before('<div class="alert alert-danger error_tg_admin"><i class="fa fa-exclamation-circle"></i>'+json['error']+'<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                    $('#content').parent().before('<div class="alert alert-danger error_tg_admin"><i class="fa fa-exclamation-circle"></i>' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
                 }
             },
             error: function (e) {
@@ -267,5 +348,14 @@
             }
         });
     }
+    function send_ban(ip){
+        console.log(ip)
+    }
+
+    {% if errors %}
+    $(document).ready( function () {
+        $('#error_table').DataTable();
+    } );
+    {% endif %}
 </script>
 {{ footer }}

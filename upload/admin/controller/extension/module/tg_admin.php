@@ -40,6 +40,8 @@ class ControllerExtensionModuleTgAdmin extends Controller
         }
 
         $this->document->addStyle('view/stylesheet/tg_admin/style.css?v=2');
+        $this->document->addStyle('view/stylesheet/tg_admin/datatables.min.css');
+        $this->document->addScript('view/javascript/tg_admin/datatables.min.js');
 
         if (isset($this->session->data['success'])) {
             $data['success'] = $this->session->data['success'];
@@ -103,7 +105,6 @@ class ControllerExtensionModuleTgAdmin extends Controller
         } catch (Exception $e) {
             $data['error_bot_updates'] = 'Ошибка: ' . $e->getMessage();
         }
-//        var_dump($data['updates']);
 
         try {
             $this->getWebhookinfo();
@@ -112,7 +113,9 @@ class ControllerExtensionModuleTgAdmin extends Controller
             $data['error_bot_webhookinfo'] = 'Ошибка: ' . $e->getMessage();
         }
 
-//        $this->sendKeyboardForTelephone($this->config->get('module_tg_admin_chat_id_admin'));
+        $file = DIR_LOGS . $this->error_logfile;
+
+        $data['errors'] = $this->ErrorTxtToArray($file);
 
         $data['users'] = $this->model_extension_module_tg_admin->getUsers();
         // Загрузка шаблонов для шапки, колонки слева и футера
@@ -216,7 +219,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
 //            $json['error_length'] = utf8_strlen($this->request->post['chat_id']);
 
-            if(!$json){
+            if (!$json) {
                 $loop = Factory::create();
                 $tgLog = new TgLog($this->config->get('module_tg_admin_bot_apikey'), new HttpClientRequestHandler($loop));
 
@@ -265,7 +268,8 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
     }
 
-    public function clearError() {
+    public function clearError()
+    {
         $this->load->language('extension/module/tg_admin');
 
         $file = DIR_LOGS . $this->error_logfile;
@@ -277,6 +281,26 @@ class ControllerExtensionModuleTgAdmin extends Controller
         $this->session->data['success'] = $this->language->get('text_success');
 
         $this->response->redirect($this->url->link('extension/module/tg_admin', 'user_token=' . $this->session->data['user_token'], true));
+    }
+
+    protected function ErrorTxtToArray($file)
+    {
+
+        $file_handle = fopen($file, "r");
+
+        $rows_array = array();
+
+        while (!feof($file_handle)) {
+            $line = fgets($file_handle);
+            if ($line) {
+                $rows_array[] = explode(":::", preg_split('/[\n\r]+/', $line, 1)[0]);
+            }
+
+        }
+        fclose($file_handle);
+
+        return $rows_array;
+
     }
 
     protected function validate()
