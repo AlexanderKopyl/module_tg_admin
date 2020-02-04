@@ -82,11 +82,8 @@ switch(strtolower_ru($message)) {
         if(getIdUser($name,$dbh)){
             sendMessage($chat_id, "Вы уже подписанны на бота");
         }else{
-            $user_data = $dbh->prepare("INSERT INTO `oc_tg_users`(`first_name`, `last_name`, `username`,`date_add`) VALUES (:first_name,:last_name,:username,:date_add)");
-            $user_data->execute(array('first_name' => $first_name,'date_add' => date('Y-m-d', $date),'username' => $name,'last_name' => $last_name,));
-
-            $user_chat = $dbh->prepare("INSERT INTO `oc_tg_chats`(`user_id`, `chat_id`) VALUES (:user_id,:chat_id)");
-            $user_chat->execute(array('user_id' => getIdUser($name,$dbh),'chat_id' => $chat_id));
+            $user_data = $dbh->prepare("INSERT INTO `oc_tg_users`(`first_name`, `last_name`, `username`,`date_add`,`chat_id`) VALUES (:first_name,:last_name,:username,:date_add,:chat_id)");
+            $user_data->execute(array('first_name' => $first_name,'date_add' => date('Y-m-d', $date),'username' => $name,'last_name' => $last_name,'chat_id'=> $chat_id));
         }
 
         break;
