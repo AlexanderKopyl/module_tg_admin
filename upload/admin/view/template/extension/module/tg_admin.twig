@@ -264,9 +264,9 @@
                                                 {% for error in errors %}
                                                     <tr>
                                                         <th scope="row">{{ error[0] }}</th>
-                                                        <td>{{ error[1] }}</td>
+                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}" target="_blank">{{ error[1] }}</a></td>
                                                         <td>{{ error[2] }}</td>
-                                                        <td>{{ error[3] }}</td>
+                                                        <td width="100px">{{ error[3] }}</td>
                                                         <td>{{ error[4] }}</td>
                                                         {% if error[1] %}
                                                             <td>
@@ -275,7 +275,7 @@
                                                                         data-toggle="tooltip"
                                                                         data-original-title="Отправить запрос"
                                                                         data-ip="{{ error[1] }}"
-                                                                        onclick="send_ban('{{ error[1] }}')">
+                                                                        onclick="send_ban('{{ error[1] }}', 'send_ban-{{ error[1] }}')">
                                                                     <i class="fa fa-ban" aria-hidden="true"></i>
                                                                 </button>
                                                             </td>
@@ -284,7 +284,7 @@
                                                 {% endfor %}
                                             {% else %}
                                                 <tr>
-                                                    <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                                                    <td class="text-center" colspan="6">{{ text_no_results }}</td>
                                                 </tr>
                                             {% endif %}
 
@@ -322,9 +322,9 @@
                                                 {% for error in errors_admin %}
                                                     <tr>
                                                         <th scope="row">{{ error[0] }}</th>
-                                                        <td>{{ error[1] }}</td>
+                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}" target="_blank">{{ error[1] }}</a></td>
                                                         <td>{{ error[2] }}</td>
-                                                        <td>{{ error[3] }}</td>
+                                                        <td width="100px">{{ error[3] }}</td>
                                                         <td>{{ error[4] }}</td>
                                                         {% if error[1] %}
                                                             <td>
@@ -342,7 +342,7 @@
                                                 {% endfor %}
                                             {% else %}
                                                 <tr>
-                                                    <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                                                    <td class="text-center" colspan="6">{{ text_no_results }}</td>
                                                 </tr>
                                             {% endif %}
 
@@ -442,8 +442,29 @@
             }
         });
     }
-    function send_ban(ip){
-        console.log(ip)
+    function send_ban(ip,className){
+        $.ajax({
+            url: "index.php?route=extension/module/tg_admin/curlPostCloud&user_token={{ user_token }}",
+            type: 'post',
+            data: {'ip': ip},
+            beforeSend: function () {
+                $('.' + className).button('loading');
+            },
+            complete: function () {
+                $('.' + className).button('reset');
+            },
+            success: function (json) {
+
+                console.log(JSON.parse(json));
+
+                if (json['error']) {
+                    $('#content').parent().before('<div class="alert alert-danger error_tg_admin"><i class="fa fa-exclamation-circle"></i>' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                }
+            },
+            error: function (e) {
+                console.log(e)
+            }
+        });
     }
 
     {% if errors %}

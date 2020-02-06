@@ -115,6 +115,14 @@ class ControllerExtensionModuleTgAdmin extends Controller
         } catch (Exception $e) {
             $data['error_bot_webhookinfo'] = 'Ошибка: ' . $e->getMessage();
         }
+//        try {
+//            $data['users_rules_cloud'] = $this->curlGet('https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules');
+//        }catch (Exception $e){
+//            $data['error_users_rules_cloud'] = 'Ошибка: ' . $e->getMessage();
+//        }
+//        var_dump($data['users_rules_cloud']);
+
+
 
         $file       = DIR_LOGS . $this->error_logfile;
         $file_admin = DIR_LOGS . $this->error_logfile_admin;
@@ -149,7 +157,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
         $loop->run();
     }
 
-    //    Get information about Bot
+
     protected function getMe($api)
     {
         $loop = Factory::create();
@@ -172,8 +180,6 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
         $getUpdates = new GetUpdates();
 
-// If using this method, send an offset (AKA last known update_id) to avoid getting duplicate update notifications.
-#$getUpdates->offset = 328221148;
         $updatePromise = $tgLog->performApiRequest($getUpdates);
         $updatePromise->then(
             function (TraversableCustomType $updatesArray) {
@@ -336,6 +342,82 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
         return $rows_array;
 
+    }
+
+    protected function  ListAccessRules(){
+
+    }
+    public function CreateAccessRule(){
+
+    }
+    public function DeleteAccessRule(){
+
+    }
+    public function curlPostCloud($action ='https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules'){
+
+        $this->load->language('extension/module/tg_admin');
+
+        $json = array();
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+
+            if(isset($this->request->post['ip'])){
+                $data_to_cloud = json_encode(array(
+                    "mode" => "js_challenge",
+                    "configuration" => array(
+                        "target" => "ip",
+                        "value" => $this->request->post['ip']
+                    ),
+                    "notes" => "Ban user"
+                ));
+            }else{
+                $json['error_ip'] = $this->language->get('error_ip');
+            }
+
+
+            try {
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $action);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_POST, true);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                    "X-Auth-Email: {cloud-email}",
+                    "X-Auth-Key: {api-key-cloud}",
+                    "Content-Type: application/json"
+                ));
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data_to_cloud);
+                $out = curl_exec($curl);
+                curl_close($curl);
+            } catch (Exception $e) {
+                $json['error'] = $e->getMessage();
+            }
+
+            if(!$json){
+                $json['request'] = $out;
+            }
+
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    protected function curlGetCloud($action){
+        try {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $action);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "X-Auth-Email: {cloud-email}",
+                "X-Auth-Key: {api-key-cloud}",
+                "Content-Type: application/json"
+            ));
+            $out = curl_exec($curl);
+            curl_close($curl);
+        } catch (Exception $e) {
+            return false;
+        }
+        return $out;
     }
 
     protected function validate()
