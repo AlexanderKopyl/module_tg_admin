@@ -1,5 +1,19 @@
 {{ header }}{{ column_left }}
+
 <div id="content">
+    <div id="modal-answer" class="modal fade">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Сообщение от сервера</h4>
+                </div>
+                <div id="popup_answer" class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="page-header">
         <div class="container-fluid">
 
@@ -112,6 +126,39 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                       for="input-tg_cloud_mail">{{ entry_cloud_mail }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_tg_admin_cloud_mail"
+                                           value="{{ module_tg_admin_cloud_mail }}"
+                                           placeholder="{{ entry_cloud_mail }}"
+                                           id="input-tg_cloud_mail" class="form-control"/>
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle"></i>
+                                        {{ cloud_mail_text }}
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                       for="input-tg_cloud_api">{{ entry_cloud_api }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_tg_admin_cloud_api"
+                                           value="{{ module_tg_admin_cloud_api }}"
+                                           placeholder="{{ entry_cloud_api }}"
+                                           id="input-tg_cloud_api" class="form-control"/>
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle"></i>
+                                        {{ cloud_api_text }}
+                                    </div>
+                                </div>
+
+                            </div>
+
 
                             <!-- Настройка: "Статус" -->
                             <div class="form-group">
@@ -454,8 +501,18 @@
                 $('.' + className).button('reset');
             },
             success: function (json) {
+                // console.log(json['success']);
+                if(json['success'].success){
+                    console.log(json['success']);
+                    $('#modal-answer').modal('show');
+                    // $('#popup_answer').html($('<div class="register_success">'+json['success'].errors[0].message+ '</div>').fadeIn());
+                    $('#popup_answer').html($('<div class="alert alert-success"><i class="fa fa-exclamation-circle"></i>IP был забанен</div>').fadeIn());
 
-                console.log(JSON.parse(json));
+                }else {
+                    $('#modal-answer').modal('show');
+                    // $('#popup_answer').html($('<div class="register_success">'+json['success'].errors[0].message+ '</div>').fadeIn());
+                    $('#popup_answer').html($('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i>' + json['success'].errors[0].message + '</div>').fadeIn());
+                }
 
                 if (json['error']) {
                     $('#content').parent().before('<div class="alert alert-danger error_tg_admin"><i class="fa fa-exclamation-circle"></i>' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');

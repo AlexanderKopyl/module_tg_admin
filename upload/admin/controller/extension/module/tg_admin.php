@@ -88,11 +88,25 @@ class ControllerExtensionModuleTgAdmin extends Controller
         } else {
             $data['module_tg_admin_bot_apikey'] = $this->config->get('module_tg_admin_bot_apikey');
         }
+
         if (isset($this->request->post['module_tg_admin_chat_id_admin'])) {
             $data['module_tg_admin_chat_id_admin'] = $this->request->post['module_tg_admin_chat_id_admin'];
         } else {
             $data['module_tg_admin_chat_id_admin'] = $this->config->get('module_tg_admin_chat_id_admin');
         }
+
+        if (isset($this->request->post['module_tg_admin_cloud_mail'])) {
+            $data['module_tg_admin_cloud_mail'] = $this->request->post['module_tg_admin_cloud_mail'];
+        } else {
+            $data['module_tg_admin_cloud_mail'] = $this->config->get('module_tg_admin_cloud_mail');
+        }
+
+        if (isset($this->request->post['module_tg_admin_cloud_api'])) {
+            $data['module_tg_admin_cloud_api'] = $this->request->post['module_tg_admin_cloud_api'];
+        } else {
+            $data['module_tg_admin_cloud_api'] = $this->config->get('module_tg_admin_cloud_api');
+        }
+
         $bot_api = $this->config->get('module_tg_admin_bot_apikey') ?: '74409123123:adadasdasdasdasd';
 
         try {
@@ -381,8 +395,8 @@ class ControllerExtensionModuleTgAdmin extends Controller
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_POST, true);
                 curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                    "X-Auth-Email: {cloud-email}",
-                    "X-Auth-Key: {api-key-cloud}",
+                    "X-Auth-Email:" . $this->config->get('module_tg_admin_cloud_mail'),
+                    "X-Auth-Key: " . $this->config->get('module_tg_admin_cloud_api'),
                     "Content-Type: application/json"
                 ));
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $data_to_cloud);
@@ -393,7 +407,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
             }
 
             if(!$json){
-                $json['request'] = $out;
+                $json['success'] = json_decode($out);
             }
 
         }
@@ -408,8 +422,8 @@ class ControllerExtensionModuleTgAdmin extends Controller
             curl_setopt($curl, CURLOPT_URL, $action);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
             curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                "X-Auth-Email: {cloud-email}",
-                "X-Auth-Key: {api-key-cloud}",
+                "X-Auth-Email:" . $this->config->get('module_tg_admin_cloud_mail'),
+                "X-Auth-Key: " . $this->config->get('module_tg_admin_cloud_api'),
                 "Content-Type: application/json"
             ));
             $out = curl_exec($curl);
