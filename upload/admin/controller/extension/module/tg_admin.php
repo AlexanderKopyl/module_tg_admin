@@ -21,6 +21,7 @@ class ControllerExtensionModuleTgAdmin extends Controller
     private $updates = array();
     private $error_logfile = '404_log.log';
     private $error_logfile_admin = '404_admin_login.log';
+    private $access_log = 'access.log';
 
     public function index()
     {
@@ -107,6 +108,12 @@ class ControllerExtensionModuleTgAdmin extends Controller
             $data['module_tg_admin_cloud_api'] = $this->config->get('module_tg_admin_cloud_api');
         }
 
+        if (isset($this->request->post['module_tg_admin_functional_way'])) {
+            $data['module_tg_admin_functional_way'] = $this->request->post['module_tg_admin_functional_way'];
+        } else {
+            $data['module_tg_admin_functional_way'] = $this->config->get('module_tg_admin_functional_way');
+        }
+
         $bot_api = $this->config->get('module_tg_admin_bot_apikey') ?: '74409123123:adadasdasdasdasd';
 
         try {
@@ -138,11 +145,17 @@ class ControllerExtensionModuleTgAdmin extends Controller
 
 
 
-        $file       = DIR_LOGS . $this->error_logfile;
-        $file_admin = DIR_LOGS . $this->error_logfile_admin;
+        $file            = DIR_LOGS . $this->error_logfile;
+        $file_admin      = DIR_LOGS . $this->error_logfile_admin;
+        $access_log_file = DIR_MAIN_LOG . $this->access_log;
 
-        $data['errors'] = $this->ErrorTxtToArray($file);
+        $data['errors']       = $this->ErrorTxtToArray($file);
         $data['errors_admin'] = $this->ErrorAdminTxtToArray($file_admin);
+
+        if($data['module_tg_admin_functional_way']){
+            $data['access']       = $this->accessLogArray($access_log_file);
+        }
+
 //        $this->sendKeyboardForTelephone($this->config->get('module_tg_admin_chat_id_admin'));
 
         $data['users'] = $this->model_extension_module_tg_admin->getUsers();
@@ -349,6 +362,25 @@ class ControllerExtensionModuleTgAdmin extends Controller
             $line = fgets($file_handle);
             if ($line) {
                 $rows_array[] = explode(":::", preg_split('/[\n\r]+/', $line, 1)[0]);
+            }
+
+        }
+        fclose($file_handle);
+
+        return $rows_array;
+
+    }
+    protected function accessLogArray($file)
+    {
+
+        $file_handle = fopen($file, "r");
+
+        $rows_array = array();
+
+        while (!feof($file_handle)) {
+            $line = fgets($file_handle);
+            if ($line) {
+                $rows_array[] = explode(" - ", preg_split('/[\n\r]+/', $line, 1)[0]);
             }
 
         }

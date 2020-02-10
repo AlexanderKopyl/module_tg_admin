@@ -72,6 +72,14 @@
                             <a href="#tab-error_admin" data-toggle="tab" aria-expanded="false"><i
                                         class="fa fa-exclamation-triangle"></i>Admin 404</a>
                         </li>
+
+                        {% if ("access" in module_tg_admin_functional_way) %}
+                            <li class="">
+                                <a href="#tab-access" data-toggle="tab" aria-expanded="false"><i
+                                            class="fa fa-sign-in"></i>Access.log</a>
+                            </li>
+                        {% endif %}
+
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab-general">
@@ -159,7 +167,21 @@
 
                             </div>
 
-
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{ text_dop_blank }}</label>
+                                <div class="col-sm-10">
+                                    <label class="control-label" onclick="functional()">
+                                        <input type="checkbox"
+                                               value="access"
+                                               name="access"
+                                               class="fun_way"
+                                               {% if ("access" in module_tg_admin_functional_way) %}checked="checked"{% endif %}
+                                        /> {{ text_access_log }}
+                                    </label>
+                                </div>
+                                <input type="text" id="fun" name="module_tg_admin_functional_way"
+                                       value="{{ module_tg_admin_functional_way }}" hidden/>
+                            </div>
                             <!-- Настройка: "Статус" -->
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
@@ -311,7 +333,8 @@
                                                 {% for error in errors %}
                                                     <tr>
                                                         <th scope="row">{{ error[0] }}</th>
-                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}" target="_blank">{{ error[1] }}</a></td>
+                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}"
+                                                               target="_blank">{{ error[1] }}</a></td>
                                                         <td>{{ error[2] }}</td>
                                                         <td width="100px">{{ error[3] }}</td>
                                                         <td>{{ error[4] }}</td>
@@ -338,7 +361,8 @@
                                             </tbody>
                                         </table>
                                         <div class="text-right">
-                                            <a href="index.php?route=extension/module/tg_admin/clearError&user_token={{ user_token }}" class="btn btn-danger send_clear" onclick="clearErrorFile()">
+                                            <a href="index.php?route=extension/module/tg_admin/clearError&user_token={{ user_token }}"
+                                               class="btn btn-danger send_clear" onclick="clearErrorFile()">
                                                 <i class="fa fa-eraser"></i>
                                                 Очистить
                                             </a>
@@ -369,7 +393,8 @@
                                                 {% for error in errors_admin %}
                                                     <tr>
                                                         <th scope="row">{{ error[0] }}</th>
-                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}" target="_blank">{{ error[1] }}</a></td>
+                                                        <td><a href="https://www.abuseipdb.com/check/{{ error[1] }}"
+                                                               target="_blank">{{ error[1] }}</a></td>
                                                         <td>{{ error[2] }}</td>
                                                         <td width="100px">{{ error[3] }}</td>
                                                         <td>{{ error[4] }}</td>
@@ -396,7 +421,8 @@
                                             </tbody>
                                         </table>
                                         <div class="text-right">
-                                            <a href="index.php?route=extension/module/tg_admin/clearErrorAdmin&user_token={{ user_token }}" class="btn btn-danger send_clear" onclick="clearErrorFile()">
+                                            <a href="index.php?route=extension/module/tg_admin/clearErrorAdmin&user_token={{ user_token }}"
+                                               class="btn btn-danger send_clear" onclick="clearErrorFile()">
                                                 <i class="fa fa-eraser"></i>
                                                 Очистить
                                             </a>
@@ -405,6 +431,55 @@
                                 </div>
                             </div>
                         </div>
+                        {% if ("access" in module_tg_admin_functional_way) %}
+                            <div class="tab-pane" id="tab-access">
+
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <div class="table-responsive">
+
+                                            <table class="table table-bordered" id="access">
+                                                <thead>
+                                                <tr>
+                                                    <th>ip</th>
+                                                    <th>another</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% if access %}
+                                                    {% for log in access %}
+                                                        <tr>
+                                                            <th scope="row"><a
+                                                                        href="https://www.abuseipdb.com/check/{{ log[0] }}"
+                                                                        target="_blank">{{ log[0] }}</a></th>
+                                                            <td>{{ log[1] }}</td>
+                                                            {% if log[0] %}
+                                                                <td>
+                                                                    <button type="button"
+                                                                            class="btn btn-primary"
+                                                                            data-toggle="tooltip"
+                                                                            data-original-title="Отправить запрос"
+                                                                            data-ip="{{ log[0] }}"
+                                                                            onclick="send_ban('{{ log[0] }}')">
+                                                                        <i class="fa fa-ban" aria-hidden="true"></i>
+                                                                    </button>
+                                                                </td>
+                                                            {% endif %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <tr>
+                                                        <td class="text-center" colspan="6">{{ text_no_results }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div class="tab-pane" id="tab-info">
                             <div class="row">
                                 <div class="col-md-6">
@@ -438,8 +513,10 @@
                                         </div>
                                         <div class="panel-body">
                                             <p>
-                                                Откройте файл admin / config.php через FTP и добавьте строки ниже после тега « <"?php" » в новой строке
-                                                (замените YourPassword на свой код пользовательского доступа (не фактический пароль пользователя)):
+                                                Откройте файл admin / config.php через FTP и добавьте строки ниже после
+                                                тега « <"?php" » в новой строке
+                                                (замените YourPassword на свой код пользовательского доступа (не
+                                                фактический пароль пользователя)):
                                             </p>
                                             <p>
                                                 define('PASS_KEY', 'passkey');
@@ -451,8 +528,27 @@
                                                 define('PASS', '4586');
 
 
-                                                Вы можете перейти на свою страницу администратора, перейдя по ссылке: http://yourwebsite.com/admin/?p=4586
+                                                Вы можете перейти на свою страницу администратора, перейдя по ссылке:
+                                                http://yourwebsite.com/admin/?p=4586
 
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Отображение access.log</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>
+                                                Откройте файл admin/config.php
+                                            </p>
+                                            <p>
+                                                добавте путь :
+                                                $dir = dirname(dirname(__FILE__));
+                                                define('DIR_MAIN_LOG', $dir.'/../log/'); - путь к папке с access.log
+                                                У вас все может быть по другому ....
                                             </p>
                                         </div>
                                     </div>
@@ -489,7 +585,8 @@
             }
         });
     }
-    function send_ban(ip,className){
+
+    function send_ban(ip, className) {
         $.ajax({
             url: "index.php?route=extension/module/tg_admin/curlPostCloud&user_token={{ user_token }}",
             type: 'post',
@@ -502,13 +599,13 @@
             },
             success: function (json) {
                 // console.log(json['success']);
-                if(json['success'].success){
+                if (json['success'].success) {
                     console.log(json['success']);
                     $('#modal-answer').modal('show');
                     // $('#popup_answer').html($('<div class="register_success">'+json['success'].errors[0].message+ '</div>').fadeIn());
                     $('#popup_answer').html($('<div class="alert alert-success"><i class="fa fa-exclamation-circle"></i>IP был забанен</div>').fadeIn());
 
-                }else {
+                } else {
                     $('#modal-answer').modal('show');
                     // $('#popup_answer').html($('<div class="register_success">'+json['success'].errors[0].message+ '</div>').fadeIn());
                     $('#popup_answer').html($('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i>' + json['success'].errors[0].message + '</div>').fadeIn());
@@ -524,20 +621,37 @@
         });
     }
 
+    function functional() {
+
+
+        let elems = $(".fun_way:checked");
+        let str = '';
+        elems.each(function () {
+            str += $(this).prop("name") + ',';
+        });
+        console.log($("#fun").val(str), str);
+        $("#fun").val(str);
+
+    }
     {% if errors %}
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#error_table').DataTable();
-    } );
+    });
     {% endif %}
     {% if errors_admin %}
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#error_admin_table').DataTable();
-    } );
+    });
+    {% endif %}
+    {% if access %}
+    $(document).ready(function () {
+        $('#access').DataTable();
+    });
     {% endif %}
     {% if users %}
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#users').DataTable();
-    } );
+    });
     {% endif %}
 </script>
 {{ footer }}
